@@ -90,7 +90,7 @@ public class NFCPairActivity extends Activity implements NfcAdapter.CreateNdefMe
         // When the items are scanned, the raspberry pie will send a bulk message with the
         // aisle number and all the items to the server
         // Server will do a lookup of prices and make a call back to the phone when the phone
-        // wants to pay the bill 
+        // wants to pay the bill
 
     }
 }
