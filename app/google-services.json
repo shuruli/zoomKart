@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "875452968074",
+    "project_id": "firebase-paykart"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875452968074:android:9fd0439849232e7b",
+        "android_client_info": {
+          "package_name": "zoomkart.paykart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "875452968074-hh8p9j0tbvmos0t8f4qhe3s2adjk4feh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "zoomkart.paykart",
+            "certificate_hash": "FF4770B334A5EC9EC7CC56E2EE1D49B7CA1FD72D"
+          }
+        },
+        {
+          "client_id": "875452968074-tifvb4am9pbj7582ctrnqchfb1bghcgm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrSDx2fJTGelgzCinHjH8XZRVRT5OsFLQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

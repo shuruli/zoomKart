@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PayKart</string>
+    <color name="white">#FFFFFF</color>
 </resources>
