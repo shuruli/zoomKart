@@ -3,13 +3,13 @@ package zoomkart.paykart;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -19,6 +19,15 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.IOException;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import zoomkart.paykart.models.ListItems;
+import zoomkart.paykart.network.RetrofitServices;
+
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
 
     private static final String TAG = "SignInActivity";
@@ -26,6 +35,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
+    private RetrofitServices.APIService mApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +49,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://zoomkart.herokuapp.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        mApiService = retrofit.create(RetrofitServices.APIService.class);
+
 
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
@@ -123,9 +141,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
         }*/
         /* Create an Intent that will start the Menu-Activity. */
-        Intent mainIntent = new Intent(LoginActivity.this ,NFCPairActivity.class);
-        this.startActivity(mainIntent);
-        this.finish();
+        new DownloadItems(this).execute("");
+        showProgressDialog();
     }
 
     // [START handleSignInResult]
@@ -138,6 +155,34 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
+        }
+    }
+    private class DownloadItems extends AsyncTask<String, Void, String> {
+        private Activity activity;
+
+        public DownloadItems(Activity activity){
+            this.activity = activity;
+        }
+
+        @Override
+        protected String doInBackground(String ... params) {
+            try {
+                Call<ListItems> call = mApiService.loadItems();
+                Response<ListItems> item = call.execute();
+                String bob = item.message();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "Executed";
+        }
+
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+            Intent mainIntent = new Intent(LoginActivity.this , BillActivity.class);
+            activity.startActivity(mainIntent);
+            activity.finish();
+            //textView.setText(result);
         }
     }
 }
