@@ -5,19 +5,23 @@ package zoomkart.paykart.models;
  */
 public class Customer {
 
-    private int mId;
+    private String mId;
     private String mFirstName;
     private String mLastName;
-    private String mPassword;
+    private String mEmail;
 
-    public Customer(int id, String firstName, String lastName, String password) {
+    public Customer(String id, String firstName, String lastName, String email) {
         this.mId = id;
         this.mFirstName = firstName;
         this.mLastName = lastName;
-        this.mPassword = password;
+        this.mEmail = email;
     }
 
-    public int getId(){
+    public Customer(){
+
+    }
+
+    public String getId(){
         return this.mId;
     }
 
@@ -27,9 +31,5 @@ public class Customer {
 
     public String getLastName(){
         return this.mLastName;
-    }
-
-    public void setPassword(String Password){
-        this.mPassword = Password;
     }
 }

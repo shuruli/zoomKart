@@ -31,8 +31,6 @@ import com.google.android.gms.wallet.WalletConstants;
 import com.google.android.gms.wallet.fragment.SupportWalletFragment;
 import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
-import com.stripe.android.model.Token;
-import com.stripe.model.Card;
 
 public class PaymentActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
