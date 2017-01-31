@@ -24,7 +24,7 @@ ext {
 }
 
 dependencies {
-    compile 'com.stripe:stripe-android:+'
+    compile 'com.stripe:stripe-android:2.0.2'
     compile 'com.google.code.gson:gson:2.6.2'
     compile 'io.paperdb:paperdb:2.0'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.wallet.fragment.WalletFragmentMode;
 import com.google.android.gms.wallet.fragment.WalletFragmentStyle;
+import com.google.gson.Gson;
 import com.stripe.android.*;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -31,6 +32,8 @@ import com.google.android.gms.wallet.WalletConstants;
 import com.google.android.gms.wallet.fragment.SupportWalletFragment;
 import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
+import com.stripe.android.model.Token;
+import com.stripe.android.net.StripeApiHandler;
 
 public class PaymentActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -58,6 +61,7 @@ public class PaymentActivity extends FragmentActivity implements GoogleApiClient
                         .setTheme(WalletConstants.THEME_LIGHT)
                         .build())
                 .build();
+
 
         Wallet.Payments.isReadyToPay(googleApiClient).setResultCallback(
                 new ResultCallback<BooleanResult>() {
@@ -91,7 +95,7 @@ public class PaymentActivity extends FragmentActivity implements GoogleApiClient
                         .setPaymentMethodTokenizationType(PaymentMethodTokenizationType.PAYMENT_GATEWAY)
                         .addParameter("gateway", "stripe")
                         .addParameter("stripe:publishableKey", PUBLISHABLE_KEY)
-                        .addParameter("stripe:version", com.stripe.Stripe.VERSION)
+                        .addParameter("stripe:version", StripeApiHandler.VERSION)
                         .build())
 
                 // You want the shipping address:
@@ -169,8 +173,8 @@ public class PaymentActivity extends FragmentActivity implements GoogleApiClient
                 //i.e. WalletConstants.ENVIRONMENT_PRODUCTION
                 if (mEnvironment == WalletConstants.ENVIRONMENT_PRODUCTION)
                 {
-                    com.stripe.model.Token token = com.stripe.model.Token.GSON.fromJson(
-                            tokenJSON, com.stripe.model.Token.class);
+                    Gson gson = new Gson();
+                    Token token = gson.fromJson(tokenJSON, Token.class);
                 }
             }
         } else {
