@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">PayKart</string>
+    <string name="activity_into">Reader mode active</string>
+    <string name="aiddescription">aiddescription</string>
+    <string name="servicedesc">servicedesc</string>
     <color name="white">#FFFFFF</color>
 </resources>

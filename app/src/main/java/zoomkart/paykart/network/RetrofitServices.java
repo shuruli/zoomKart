@@ -16,5 +16,10 @@ public class RetrofitServices {
     public interface APIService {
         @GET("/order_items?customer_id=1")
         Call<ListItems> loadItems();
+
+        @GET("/order_items?customer_id=1")
+        Call checkEndPoint();
     }
+
+
 }

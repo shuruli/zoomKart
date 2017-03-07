@@ -1,27 +1,51 @@
 package zoomkart.paykart;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcEvent;
+import android.nfc.cardemulation.CardEmulation;
+import android.os.AsyncTask;
+import android.os.IBinder;
+import android.os.Messenger;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.pusher.client.Pusher;
+import com.pusher.client.channel.Channel;
+import com.pusher.client.channel.SubscriptionEventListener;
+
 import java.nio.charset.Charset;
 
-public class NFCPairActivity extends Activity implements NfcAdapter.CreateNdefMessageCallback {
+import zoomkart.paykart.services.MyHostApduService;
+
+public class NFCPairActivity extends Activity {
 
     NfcAdapter mNfcAdapter;
+    SharedPreferences mSharedPreferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nfcpair);
+        Context context = getApplicationContext();
+
+        mSharedPreferences= context.getSharedPreferences("NFC", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean("validRead", true);
+        editor.putBoolean("readComplete", false);
+        editor.commit();
+
 
         // Check for available NFC Adapter
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -30,67 +54,45 @@ public class NFCPairActivity extends Activity implements NfcAdapter.CreateNdefMe
             finish();
             return;
         }
-        // Register callback
-        mNfcAdapter.setNdefPushMessageCallback(this, this);
+
     }
 
-    @Override
-    public NdefMessage createNdefMessage(NfcEvent event) {
+    private void subscribeToPusher(){
+        Pusher pusher = new Pusher("d6f65af47015b83ec19b");
 
-        String text = ("Beam me up, Android!\n\n" +
-                "Beam Time: " + System.currentTimeMillis());
+        Channel channel = pusher.subscribe("channel");
 
-        NdefRecord uriRecord = new NdefRecord(
-                NdefRecord.TNF_ABSOLUTE_URI ,
-                "http://zoomkart".getBytes(Charset.forName("US-ASCII")),
-                new byte[0], new byte[0]);
-
-        return new NdefMessage(uriRecord);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Check to see that the Activity started due to an Android Beam
-        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
-            processIntent(getIntent());
-
-            if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
-                Parcelable[] rawMsgs = getIntent().getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-                if (rawMsgs != null) {
-                    NdefMessage[] msgs = new NdefMessage[rawMsgs.length];
-
-                    for (int i = 0; i < rawMsgs.length; i++) {
-                        msgs[i] = (NdefMessage) rawMsgs[i];
-                    }
-                }
+        channel.bind("my-event", new SubscriptionEventListener() {
+            @Override
+            public void onEvent(String channelName, String eventName, final String data) {
+                Log.d("[NFCPairActivity] Event", "Channel Name: " + channelName + " data: " + data);
             }
+        });
+
+        pusher.connect();
+    }
+
+    private class NFCTapTask extends AsyncTask<String, Void, Integer> {
+        private Activity mActivity;
+        private SharedPreferences mTapTaskSharedPreferences;
+
+        public NFCTapTask (Activity activity){
+            mActivity = activity;
+        }
+
+        protected Integer doInBackground(String ... s) {
+            mTapTaskSharedPreferences = mActivity.getSharedPreferences("NFC", Context.MODE_PRIVATE);
+            while (mTapTaskSharedPreferences.getBoolean("readComplete", false) == false)
+            {
+
+            }
+            return 0;
+        }
+
+        protected void onPostExecute(Integer result) {
+            Log.d("Result is: ", result.toString());
         }
     }
 
-    @Override
-    public void onNewIntent(Intent intent) {
-        // onResume gets called after this to handle the intent
-        setIntent(intent);
-    }
 
-    /**
-     * Parses the NDEF Message from the intent and prints to the TextView
-     */
-    void processIntent(Intent intent) {
-        Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
-                NfcAdapter.EXTRA_NDEF_MESSAGES);
-        // only one message sent during the beam
-        NdefMessage msg = (NdefMessage) rawMsgs[0];
-        // record 0 contains the MIME type, record 1 is the AAR, if present
-        Toast.makeText(this, new String(msg.getRecords()[0].getPayload()), Toast.LENGTH_LONG).show();
-
-        // Make an API call to the server here by generating a unique device id and the aisle number
-        // Now the server knows the phone and aisle pairing
-        // When the items are scanned, the raspberry pie will send a bulk message with the
-        // aisle number and all the items to the server
-        // Server will do a lookup of prices and make a call back to the phone when the phone
-        // wants to pay the bill
-
-    }
 }

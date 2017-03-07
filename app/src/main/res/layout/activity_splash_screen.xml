@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="zoomkart.paykart.SplashScreen">
+    tools:context="zoomkart.paykart.SplashScreenActivity">
 
     <ImageView android:id="@+id/splashscreen"
         android:layout_width="wrap_content"

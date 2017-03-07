@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "24.0.0"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "zoomkart.paykart"
@@ -29,6 +29,7 @@ dependencies {
     compile 'io.paperdb:paperdb:2.0'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.pusher:pusher-java-client:1.4.0'
     compile 'com.google.android.gms:play-services-auth:9.0.2'
     compile 'com.google.android.gms:play-services-wallet:9.0.2'
     compile fileTree(dir: 'libs', include: ['*.jar'])

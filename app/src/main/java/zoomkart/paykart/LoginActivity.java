@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TimingLogger;
 import android.view.View;
 import android.view.Window;
 
@@ -73,11 +74,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         // Restore preferences
         mCustomer = Paper.book().read("customer");
-        if (mCustomer != null){
+        /*if (mCustomer != null){
             new DownloadItems(this).execute("");
             showProgressDialog();
             return;
-        }
+        }*/
 
         if (!isConnected){
             displayNoConnectionResult();
@@ -200,15 +201,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         //TODO: Simply display UI for no connection and option for offline viewing
     }
     private class DownloadItems extends AsyncTask<String, Void, String> {
-        private Activity activity;
         private Response<ListItems> item;
-        public DownloadItems(Activity activity){
+        private Activity activity;
+        TimingLogger timings;
+
+        public DownloadItems (Activity activity){
             this.activity = activity;
         }
 
         @Override
         protected String doInBackground(String ... params) {
             try {
+                timings = new TimingLogger(TAG, "methodA");
                 Call<ListItems> call = mApiService.loadItems();
                 item = call.execute();
                 Log.d ("Items", item.message());
@@ -223,11 +227,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         @Override
         protected void onPostExecute(String result) {
             if (item != null && item.isSuccessful()){
-
+                timings.dumpToLog();
             }
-            Intent mainIntent = new Intent(LoginActivity.this , BillActivity.class);
-            activity.startActivity(mainIntent);
-            activity.finish();
+            Intent mainIntent = new Intent(LoginActivity.this , NFCPairActivity.class);
+            this.activity.startActivity(mainIntent);
         }
     }
 }

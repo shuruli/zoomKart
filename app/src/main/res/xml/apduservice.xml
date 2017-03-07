@@ -1,0 +1,18 @@
+<host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/servicedesc"
+    android:requireDeviceUnlock="false" >
+
+    <aid-group
+        android:category="other"
+        android:description="@string/aiddescription" >
+        <aid-filter android:name="D2760000850100" />
+        <aid-filter android:name="F0010203040506" />
+        <aid-filter android:name="F0394148148100" />
+        <aid-filter android:name="00042078807002" />
+        <aid-filter android:name="A0A1A2" />
+        <aid-filter android:name="B0B1B2B3" />
+        <aid-filter android:name="C0C1C2C3C4" />
+        <aid-filter android:name="E0E1E2E3E4E5E6" />
+    </aid-group>
+
+</host-apdu-service>
