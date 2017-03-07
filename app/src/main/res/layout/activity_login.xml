@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:background="@color/white"
     android:layout_height="match_parent"
-    tools:context="zoomkart.paykart.LoginActivity">
+    tools:context="zoomkart.paykart.activities.LoginActivity">
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"

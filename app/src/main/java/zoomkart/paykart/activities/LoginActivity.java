@@ -1,10 +1,9 @@
-package zoomkart.paykart;
+package zoomkart.paykart.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -25,16 +24,13 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import io.paperdb.Paper;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import zoomkart.paykart.R;
 import zoomkart.paykart.models.Customer;
 import zoomkart.paykart.models.ListItems;
 import zoomkart.paykart.network.RetrofitServices;

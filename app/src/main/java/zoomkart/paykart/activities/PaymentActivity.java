@@ -1,4 +1,4 @@
-package zoomkart.paykart;
+package zoomkart.paykart.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -34,6 +34,9 @@ import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
 import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
 import com.stripe.android.model.Token;
 import com.stripe.android.net.StripeApiHandler;
+
+import zoomkart.paykart.*;
+import zoomkart.paykart.R;
 
 public class PaymentActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -86,7 +89,7 @@ public class PaymentActivity extends FragmentActivity implements GoogleApiClient
     }
 
     public void showAndroidPay() {
-        setContentView(R.layout.activity_payment);
+        setContentView(zoomkart.paykart.R.layout.activity_payment);
 
         MaskedWalletRequest maskedWalletRequest = MaskedWalletRequest.newBuilder()
 

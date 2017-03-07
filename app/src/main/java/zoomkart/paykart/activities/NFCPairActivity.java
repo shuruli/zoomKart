@@ -1,4 +1,4 @@
-package zoomkart.paykart;
+package zoomkart.paykart.activities;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -27,6 +27,7 @@ import com.pusher.client.channel.SubscriptionEventListener;
 
 import java.nio.charset.Charset;
 
+import zoomkart.paykart.R;
 import zoomkart.paykart.services.MyHostApduService;
 
 public class NFCPairActivity extends Activity {
