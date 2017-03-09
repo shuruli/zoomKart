@@ -21,15 +21,13 @@ public class MyHostApduService extends HostApduService {
     public byte[] processCommandApdu(byte[] apdu, Bundle extras) {
         SharedPreferences sharedPref = this.getSharedPreferences("NFC", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        boolean isValidRead = sharedPref.getBoolean("validRead", false);
+        boolean isValidRead = sharedPref.getBoolean("isNFCOn", false);
         byte[] welcomeMessage = null;
 
-        Log.d("MyHostApduService", "validRead is : " + Boolean.toString(isValidRead));
+        Log.d("MyHostApduService", "isNFCOn is : " + Boolean.toString(isValidRead));
 
         if (isValidRead && selectAidApdu(apdu)) {
             Log.i("HCEDEMO", "Application selected");
-            editor.putBoolean("readComplete", true);
-            editor.commit();
             Integer intValue = ByteBuffer.wrap(getWelcomeMessage()).getInt();
             Log.i("HCEDEMO INT SENT: ", intValue.toString());
             welcomeMessage = getWelcomeMessage();

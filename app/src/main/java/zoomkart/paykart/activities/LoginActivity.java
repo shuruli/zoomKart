@@ -52,6 +52,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         setContentView(R.layout.activity_login);
         getSupportActionBar().hide();
         Paper.init(this);
+
         ConnectivityManager cm =
                 (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -59,6 +60,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
+
+        if (!isConnected){
+            displayNoConnectionResult();
+        }
 
         // Building the network handler which makes the network calls
         Retrofit retrofit = new Retrofit.Builder()
@@ -70,14 +75,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         // Restore preferences
         mCustomer = Paper.book().read("customer");
-        /*if (mCustomer != null){
-            new DownloadItems(this).execute("");
+        if (mCustomer != null){
+            proceedWithLogIn();
             showProgressDialog();
             return;
-        }*/
-
-        if (!isConnected){
-            displayNoConnectionResult();
         }
 
 
@@ -151,28 +152,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             mProgressDialog.setIndeterminate(true);
         }
 
-        mProgressDialog.show();
+        //mProgressDialog.show();
     }
 
     private void hideProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.hide();
         }
-    }
-
-    private void updateUI(boolean signedIn) {
-        /*if (signedIn) {
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-        } else {
-            mStatusTextView.setText(R.string.signed_out);
-
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
-        }*/
-        /* Create an Intent that will start the Menu-Activity. */
-        new DownloadItems(this).execute("");
-        showProgressDialog();
     }
 
     // [START handleSignInResult]
@@ -186,7 +172,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             // All objects are from android.context.Context
             mCustomer = new Customer(acct.getId(), acct.getGivenName(), acct.getFamilyName(), acct.getEmail());
             Paper.book().write("customer", mCustomer);
-            updateUI(true);
+            proceedWithLogIn();
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
@@ -196,37 +182,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private void displayNoConnectionResult(){
         //TODO: Simply display UI for no connection and option for offline viewing
     }
-    private class DownloadItems extends AsyncTask<String, Void, String> {
-        private Response<ListItems> item;
-        private Activity activity;
-        TimingLogger timings;
 
-        public DownloadItems (Activity activity){
-            this.activity = activity;
-        }
-
-        @Override
-        protected String doInBackground(String ... params) {
-            try {
-                timings = new TimingLogger(TAG, "methodA");
-                Call<ListItems> call = mApiService.loadItems();
-                item = call.execute();
-                Log.d ("Items", item.message());
-                //TODO: Can handle results of the callback here
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return "Executed";
-        }
-
-        // onPostExecute displays the results of the AsyncTask.
-        @Override
-        protected void onPostExecute(String result) {
-            if (item != null && item.isSuccessful()){
-                timings.dumpToLog();
-            }
-            Intent mainIntent = new Intent(LoginActivity.this , NFCPairActivity.class);
-            this.activity.startActivity(mainIntent);
-        }
+    private void proceedWithLogIn(){
+        Intent mainIntent = new Intent(LoginActivity.this , HomepageActivity.class);
+        startActivity(mainIntent);
+        finish();
     }
 }

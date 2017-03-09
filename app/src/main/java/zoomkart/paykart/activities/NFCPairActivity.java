@@ -18,6 +18,7 @@ import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,12 +29,15 @@ import com.pusher.client.channel.SubscriptionEventListener;
 import java.nio.charset.Charset;
 
 import zoomkart.paykart.R;
+import zoomkart.paykart.models.Item;
+import zoomkart.paykart.models.ListItems;
 import zoomkart.paykart.services.MyHostApduService;
 
 public class NFCPairActivity extends Activity {
 
     NfcAdapter mNfcAdapter;
     SharedPreferences mSharedPreferences;
+    String mOrderString;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,10 +46,38 @@ public class NFCPairActivity extends Activity {
         Context context = getApplicationContext();
 
         mSharedPreferences= context.getSharedPreferences("NFC", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putBoolean("validRead", true);
-        editor.putBoolean("readComplete", false);
+        final SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean("isNFCOn", true);
         editor.commit();
+
+        Pusher pusher = new Pusher("d6f65af47015b83ec19b");
+
+        final Channel channel = pusher.subscribe("channel");
+
+        channel.bind("my-event", new SubscriptionEventListener() {
+            @Override
+            public void onEvent(String channelName, String eventName, final String data) {
+                Log.d("[NFCPairActivity] Order", "Tap Complete");
+                Log.d("[NFCPairActivity] Order", "Initiate Order Channel and show user UI to place items.");
+
+                //Reset validRead
+                editor.putBoolean("validRead", false);
+                editor.commit();
+
+                channel.bind(data, new SubscriptionEventListener() {
+                    @Override
+                    public void onEvent(String s, String s1, String s2) {
+                        ListItems listOfItems = ListItems.fromJson(s2);
+
+                        for (int i = 0; i < listOfItems.listItems.size(); i++){
+                            Log.d("[NFCPairActivity] List" , "Go to BillActivity with list now");
+                        }
+                    }
+                });
+            }
+        });
+
+        pusher.connect();
 
 
         // Check for available NFC Adapter
@@ -57,43 +89,4 @@ public class NFCPairActivity extends Activity {
         }
 
     }
-
-    private void subscribeToPusher(){
-        Pusher pusher = new Pusher("d6f65af47015b83ec19b");
-
-        Channel channel = pusher.subscribe("channel");
-
-        channel.bind("my-event", new SubscriptionEventListener() {
-            @Override
-            public void onEvent(String channelName, String eventName, final String data) {
-                Log.d("[NFCPairActivity] Event", "Channel Name: " + channelName + " data: " + data);
-            }
-        });
-
-        pusher.connect();
-    }
-
-    private class NFCTapTask extends AsyncTask<String, Void, Integer> {
-        private Activity mActivity;
-        private SharedPreferences mTapTaskSharedPreferences;
-
-        public NFCTapTask (Activity activity){
-            mActivity = activity;
-        }
-
-        protected Integer doInBackground(String ... s) {
-            mTapTaskSharedPreferences = mActivity.getSharedPreferences("NFC", Context.MODE_PRIVATE);
-            while (mTapTaskSharedPreferences.getBoolean("readComplete", false) == false)
-            {
-
-            }
-            return 0;
-        }
-
-        protected void onPostExecute(Integer result) {
-            Log.d("Result is: ", result.toString());
-        }
-    }
-
-
 }
