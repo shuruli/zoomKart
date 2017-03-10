@@ -3,5 +3,6 @@
     <string name="activity_into">Reader mode active</string>
     <string name="aiddescription">aiddescription</string>
     <string name="servicedesc">servicedesc</string>
+    <string name="loading">Loading ...</string>
     <color name="white">#FFFFFF</color>
 </resources>

@@ -1,19 +1,19 @@
 package zoomkart.paykart.activities;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TimingLogger;
 import android.view.View;
 import android.view.Window;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -23,27 +23,33 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 
 import io.paperdb.Paper;
-import retrofit2.Call;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import zoomkart.paykart.R;
 import zoomkart.paykart.models.Customer;
-import zoomkart.paykart.models.ListItems;
+import zoomkart.paykart.network.NetworkReceiver;
 import zoomkart.paykart.network.RetrofitServices;
 
-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
+public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, Observer{
 
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
-    private RetrofitServices.APIService mApiService;
     private Customer mCustomer;
+    private TextView mAuthorizeTextView;
+    private SignInButton signInButton;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NetworkReceiver.getObservable().addObserver(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,34 +59,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         getSupportActionBar().hide();
         Paper.init(this);
 
-        ConnectivityManager cm =
-                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-        if (!isConnected){
-            displayNoConnectionResult();
-        }
-
-        // Building the network handler which makes the network calls
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://zoomkart.herokuapp.com")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        mApiService = retrofit.create(RetrofitServices.APIService.class);
-
-        // Restore preferences
-        mCustomer = Paper.book().read("customer");
-        if (mCustomer != null){
-            proceedWithLogIn();
-            showProgressDialog();
-            return;
-        }
-
+        mAuthorizeTextView = (TextView) findViewById(R.id.textView3);
 
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -102,11 +81,23 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // may be displayed when only basic profile is requested. Try adding the
         // Scopes.PLUS_LOGIN scope to the GoogleSignInOptions to see the
         // difference.
-        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        signInButton = (SignInButton) findViewById(R.id.sign_in_button);
         signInButton.setColorScheme(0);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setOnClickListener(this);
         signInButton.setScopes(gso.getScopeArray());
+
+        if (checkInternetConnection() == false){
+            displayNoConnectionResult();
+        }
+
+        // Restore preferences
+        mCustomer = Paper.book().read("customer");
+        if (mCustomer != null){
+            proceedWithLogIn();
+            showProgressDialog();
+            return;
+        }
 
     }
 
@@ -121,6 +112,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sign_in_button:
+                showProgressDialog();
                 signIn();
                 break;
         }
@@ -148,11 +140,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
-            //mProgressDialog.setMessage(getString(R.string.loading));
+            mProgressDialog.setMessage(getString(R.string.loading));
             mProgressDialog.setIndeterminate(true);
         }
 
-        //mProgressDialog.show();
+        mProgressDialog.show();
     }
 
     private void hideProgressDialog() {
@@ -163,6 +155,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     // [START handleSignInResult]
     private void handleSignInResult(GoogleSignInResult result) {
+        hideProgressDialog();
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
@@ -175,17 +168,45 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             proceedWithLogIn();
         } else {
             // Signed out, show unauthenticated UI.
-            updateUI(false);
+            mAuthorizeTextView.setText("Log In Failed. Please Try Again!");
+            mAuthorizeTextView.setTextColor(Color.RED);
         }
     }
 
     private void displayNoConnectionResult(){
-        //TODO: Simply display UI for no connection and option for offline viewing
+        signInButton.setEnabled(false);
+        mAuthorizeTextView.setText("No valid internet connection!");
+        mAuthorizeTextView.setTextColor(Color.RED);
+
     }
 
     private void proceedWithLogIn(){
         Intent mainIntent = new Intent(LoginActivity.this , HomepageActivity.class);
         startActivity(mainIntent);
         finish();
+    }
+
+    private boolean checkInternetConnection(){
+        ConnectivityManager cm;
+        NetworkInfo activeNetwork;
+
+        cm =
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        activeNetwork = cm.getActiveNetworkInfo();
+
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        if (checkInternetConnection() == true){
+            signInButton.setEnabled(true);
+            mAuthorizeTextView.setText("Authorize your Google Account");
+            mAuthorizeTextView.setTextColor(Color.GRAY);
+        }
     }
 }
