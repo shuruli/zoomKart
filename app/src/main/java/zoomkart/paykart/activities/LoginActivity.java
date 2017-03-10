@@ -31,6 +31,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import zoomkart.paykart.R;
 import zoomkart.paykart.models.Customer;
+import zoomkart.paykart.models.ZoomKart;
 import zoomkart.paykart.network.NetworkReceiver;
 import zoomkart.paykart.network.RetrofitServices;
 
@@ -95,6 +96,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // Restore preferences
         mCustomer = Paper.book().read("customer");
         if (mCustomer != null){
+            ZoomKart.setCustomer(mCustomer);
             proceedWithLogIn();
             showProgressDialog();
             return;
@@ -166,6 +168,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             // All objects are from android.context.Context
             mCustomer = new Customer(acct.getId(), acct.getGivenName(), acct.getFamilyName(), acct.getEmail());
             Paper.book().write("customer", mCustomer);
+            ZoomKart.setCustomer(mCustomer);
             proceedWithLogIn();
         } else {
             // Signed out, show unauthenticated UI.

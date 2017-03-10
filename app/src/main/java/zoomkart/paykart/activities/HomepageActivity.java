@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import zoomkart.paykart.R;
@@ -20,7 +21,7 @@ public class HomepageActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
-        TextView mInitiateCheckoutButton = (TextView) findViewById(R.id.initiate_checkout_button);
+        LinearLayout mInitiateCheckoutButton = (LinearLayout) findViewById(R.id.initiate_checkout_button);
 
         mInitiateCheckoutButton.setOnClickListener(new View.OnClickListener() {
             @Override

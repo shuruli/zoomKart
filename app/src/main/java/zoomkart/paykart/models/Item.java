@@ -6,5 +6,5 @@ package zoomkart.paykart.models;
  */
 public class Item {
     public String name;
-    public double price;
+    public float price;
 }

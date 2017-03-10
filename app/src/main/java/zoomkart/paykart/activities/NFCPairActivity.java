@@ -22,15 +22,21 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.pusher.client.Pusher;
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.SubscriptionEventListener;
 
+import org.json.JSONObject;
+
 import java.nio.charset.Charset;
 
+import io.paperdb.Paper;
 import zoomkart.paykart.R;
+import zoomkart.paykart.models.Customer;
 import zoomkart.paykart.models.Item;
 import zoomkart.paykart.models.ListItems;
+import zoomkart.paykart.models.ZoomKart;
 import zoomkart.paykart.services.MyHostApduService;
 
 public class NFCPairActivity extends Activity {
@@ -44,6 +50,7 @@ public class NFCPairActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nfcpair);
         Context context = getApplicationContext();
+        Paper.init(this);
 
         mSharedPreferences= context.getSharedPreferences("NFC", Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = mSharedPreferences.edit();
@@ -59,18 +66,33 @@ public class NFCPairActivity extends Activity {
             public void onEvent(String channelName, String eventName, final String data) {
                 Log.d("[NFCPairActivity] Order", "Tap Complete");
                 Log.d("[NFCPairActivity] Order", "Initiate Order Channel and show user UI to place items.");
+                Customer customer = ZoomKart.getCustomer();
+                JSONObject json, obj;
+                String str_value = "";
+                try {
+
+                    json = new JSONObject(data);
+
+                    str_value = json.getString("data");
+
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+
+                final String orderId = str_value;
+                final String bookName = customer.getId();
 
                 //Reset validRead
                 editor.putBoolean("validRead", false);
                 editor.commit();
 
-                channel.bind(data, new SubscriptionEventListener() {
+                channel.bind(orderId, new SubscriptionEventListener() {
                     @Override
                     public void onEvent(String s, String s1, String s2) {
-                        ListItems listOfItems = ListItems.fromJson(s2);
-
-                        for (int i = 0; i < listOfItems.listItems.size(); i++){
-                            Log.d("[NFCPairActivity] List" , "Go to BillActivity with list now");
+                        Item[] items = (new Gson()).fromJson(s2, Item[].class);
+                        Paper.book(bookName).write(data, items);
+                        for (int i = 0; i < items.length; i++){
+                            Log.d("[NFCPairActivity] Item:", items[i].name);
                         }
                     }
                 });
