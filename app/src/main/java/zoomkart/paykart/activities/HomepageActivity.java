@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
 
 import zoomkart.paykart.R;
 
@@ -19,15 +20,15 @@ public class HomepageActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
-        //Button mInitiateCheckoutButton = (Button) findViewById(R.id.initiate_checkout_button);
+        TextView mInitiateCheckoutButton = (TextView) findViewById(R.id.initiate_checkout_button);
 
-        //mInitiateCheckoutButton.setOnClickListener(new View.OnClickListener() {
-        //    @Override
-        //    public void onClick(View v) {
-        //        Intent intent = new Intent(HomepageActivity.this, NFCPairActivity.class);
-        //        HomepageActivity.this.startActivity(intent);
-         //   }
-        //});
+        mInitiateCheckoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomepageActivity.this, NFCPairActivity.class);
+                HomepageActivity.this.startActivity(intent);
+            }
+        });
     }
 
     private void initiateCheckout(){

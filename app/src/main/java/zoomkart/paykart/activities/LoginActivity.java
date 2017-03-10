@@ -59,7 +59,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         getSupportActionBar().hide();
         Paper.init(this);
 
-        mAuthorizeTextView = (TextView) findViewById(R.id.textView3);
+        //mAuthorizeTextView = (TextView) findViewById(R.id.textView3);
 
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -169,15 +169,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             proceedWithLogIn();
         } else {
             // Signed out, show unauthenticated UI.
-            mAuthorizeTextView.setText("Log In Failed. Please Try Again!");
-            mAuthorizeTextView.setTextColor(Color.RED);
+            //mAuthorizeTextView.setText("Log In Failed. Please Try Again!");
+            //mAuthorizeTextView.setTextColor(Color.RED);
         }
     }
 
     private void displayNoConnectionResult(){
         signInButton.setEnabled(false);
-        mAuthorizeTextView.setText("No valid internet connection!");
-        mAuthorizeTextView.setTextColor(Color.RED);
+        //mAuthorizeTextView.setText("No valid internet connection!");
+        //mAuthorizeTextView.setTextColor(Color.RED);
 
     }
 
@@ -206,8 +206,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     public void update(Observable observable, Object data) {
         if (checkInternetConnection() == true){
             signInButton.setEnabled(true);
-            mAuthorizeTextView.setText("Authorize your Google Account");
-            mAuthorizeTextView.setTextColor(Color.GRAY);
+            //mAuthorizeTextView.setText("Authorize your Google Account");
+            //mAuthorizeTextView.setTextColor(Color.GRAY);
         }
     }
 }
