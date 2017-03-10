@@ -81,11 +81,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // may be displayed when only basic profile is requested. Try adding the
         // Scopes.PLUS_LOGIN scope to the GoogleSignInOptions to see the
         // difference.
-        signInButton = (SignInButton) findViewById(R.id.sign_in_button);
-        signInButton.setColorScheme(0);
+        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        signInButton.setColorScheme(1);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setOnClickListener(this);
         signInButton.setScopes(gso.getScopeArray());
+        signInButton.bringToFront();
 
         if (checkInternetConnection() == false){
             displayNoConnectionResult();
