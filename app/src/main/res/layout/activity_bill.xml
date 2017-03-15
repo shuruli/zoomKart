@@ -1,24 +1,62 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    android:id="@+id/main_content"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/produce"
+    android:weightSum="1"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentStart="true">
 
-    <ListView
-        android:id="@+id/items_list"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
+        android:layout_height="0dp"
+        android:layout_weight=".87"
+        android:weightSum="1"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="vertical">
 
-    <android.support.design.widget.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="16dp"
-        android:id="@+id/payment_button"
-        android:src="@drawable/ic_payment_black_24dp"
-        app:layout_anchor="@id/items_list"
-        app:layout_anchorGravity="bottom|right|end" />
+        <ListView
+            android:id="@+id/bills_items_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_rect_shape_bill"
+            android:layout_gravity="center_vertical|center_horizontal" >
+        </ListView>
 
-</android.support.design.widget.CoordinatorLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/initiate_payment_button"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_weight="0.13"
+        android:background="@color/colorTeal">
+
+        <TextView
+            android:id="@+id/initiate_payment_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:textAllCaps="true"
+            android:fontFamily="sans-serif-light"
+            android:textStyle="normal"
+            android:textColor="#000000"
+            android:text="Proceed to Payment" />
+
+    </LinearLayout>
+
+</LinearLayout>
+
+
+</RelativeLayout>

@@ -5,4 +5,19 @@
     <string name="servicedesc">servicedesc</string>
     <string name="loading">Loading ...</string>
     <color name="white">#FFFFFF</color>
+    <string-array name="provinces_array">
+        <item>ON</item>
+        <item>AB</item>
+        <item>BC</item>
+        <item>SK</item>
+        <item>NS</item>
+        <item>NL</item>
+        <item>PE</item>
+        <item>NB</item>
+        <item>QC</item>
+        <item>MB</item>
+        <item>YT</item>
+        <item>NT</item>
+        <item>NU</item>
+    </string-array>
 </resources>

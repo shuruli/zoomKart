@@ -6,11 +6,26 @@
     android:layout_height="match_parent"
     tools:context="zoomkart.paykart.activities.HomepageActivity">
 
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:id="@+id/user_profile_button"
+        android:src="@drawable/ic_account_circle_black_24dp"
+        app:layout_anchor="@id/bills_items_list"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        app:layout_anchorGravity="top|right|end" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:weightSum="1">
+        android:weightSum="1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -35,8 +50,7 @@
             android:gravity="center"
             android:layout_weight="0.125"
             android:background="@color/colorPrimaryGreen"
-            android:weightSum="1"
-            android:onClick="initiateCheckout()">
+            android:weightSum="1">
 
             <TextView
                 android:layout_width="0dp"
@@ -52,12 +66,13 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/initiate_history_button"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="horizontal"
             android:gravity="center"
             android:layout_weight="0.125"
-            android:background="@color/colorOrange"
+            android:background="@color/colorPrimary"
             android:weightSum="1">
 
             <TextView

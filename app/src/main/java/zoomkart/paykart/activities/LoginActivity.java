@@ -3,7 +3,6 @@ package zoomkart.paykart.activities;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
@@ -13,7 +12,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -22,18 +20,17 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.stripe.android.model.Card;
+import com.stripe.android.model.Token;
 
 import java.util.Observable;
 import java.util.Observer;
 
 import io.paperdb.Paper;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import zoomkart.paykart.R;
 import zoomkart.paykart.models.Customer;
 import zoomkart.paykart.models.ZoomKart;
 import zoomkart.paykart.network.NetworkReceiver;
-import zoomkart.paykart.network.RetrofitServices;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, Observer{
 
@@ -185,8 +182,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void proceedWithLogIn(){
-        Intent mainIntent = new Intent(LoginActivity.this , HomepageActivity.class);
-        startActivity(mainIntent);
+        Token token = Paper.book(mCustomer.getId()).read("payment_token", null);
+
+        if (token == null){
+            Intent mainIntent = new Intent(LoginActivity.this , CardInformationActivity.class);
+            startActivity(mainIntent);
+        } else {
+            Intent mainIntent = new Intent(LoginActivity.this , HomepageActivity.class);
+            startActivity(mainIntent);
+        }
         finish();
     }
 

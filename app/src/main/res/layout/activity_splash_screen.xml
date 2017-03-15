@@ -7,9 +7,10 @@
     tools:context="zoomkart.paykart.activities.SplashScreenActivity">
 
     <ImageView android:id="@+id/splashscreen"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:src="@drawable/splash_screen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/not_as_good_splash_screen"
+        android:scaleType="centerCrop"
         android:layout_gravity="center"/>
 
 </LinearLayout>

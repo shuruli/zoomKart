@@ -29,7 +29,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.NFCPairActivity">
+        <activity
+            android:name=".activities.NFCPairActivity"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 
@@ -78,7 +80,8 @@
             android:value="true" />
 
         <activity android:name=".activities.HomepageActivity" />
-        <activity android:name=".activities.HistoryActivity"></activity>
+        <activity android:name=".activities.HistoryActivity" />
+        <activity android:name=".activities.CardInformationActivity"></activity>
     </application>
 
 </manifest>

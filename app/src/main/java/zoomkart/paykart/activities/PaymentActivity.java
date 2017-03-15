@@ -1,196 +1,122 @@
 package zoomkart.paykart.activities;
 
-import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.provider.SyncStateContract;
-import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.View;
+import android.view.Window;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import com.google.android.gms.wallet.fragment.WalletFragmentMode;
-import com.google.android.gms.wallet.fragment.WalletFragmentStyle;
-import com.google.gson.Gson;
-import com.stripe.android.*;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.BooleanResult;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wallet.Cart;
-import com.google.android.gms.wallet.FullWallet;
-import com.google.android.gms.wallet.FullWalletRequest;
-import com.google.android.gms.wallet.LineItem;
-import com.google.android.gms.wallet.MaskedWallet;
-import com.google.android.gms.wallet.MaskedWalletRequest;
-import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
-import com.google.android.gms.wallet.PaymentMethodTokenizationType;
-import com.google.android.gms.wallet.Wallet;
-import com.google.android.gms.wallet.WalletConstants;
-import com.google.android.gms.wallet.fragment.SupportWalletFragment;
-import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
-import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
-import com.stripe.android.model.Token;
-import com.stripe.android.net.StripeApiHandler;
+import java.text.NumberFormat;
 
-import zoomkart.paykart.*;
+import io.paperdb.Paper;
 import zoomkart.paykart.R;
+import zoomkart.paykart.models.Order;
+import zoomkart.paykart.models.ZoomKart;
 
-public class PaymentActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class PaymentActivity extends AppCompatActivity {
 
     // You will need to use your live API key even while testing
     public static final String PUBLISHABLE_KEY = " pk_live_E6uv3wI3bXTQNNZaU3Dbhgg1" +
             "";
     public static final String TAG = "PaymentActivity";
-    public static final int mEnvironment = WalletConstants.ENVIRONMENT_TEST;
 
     // Unique identifiers for asynchronous requests:
     private static final int LOAD_MASKED_WALLET_REQUEST_CODE = 1000;
     private static final int LOAD_FULL_WALLET_REQUEST_CODE = 1001;
 
     private GoogleApiClient googleApiClient;
-    private SupportWalletFragment mWalletFragment;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.activity_payment);
+        Paper.init(this);
+        getSupportActionBar().hide();
 
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Wallet.API, new Wallet.WalletOptions.Builder()
-                        .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
-                        .setTheme(WalletConstants.THEME_LIGHT)
-                        .build())
-                .build();
+        LinearLayout initiatePayButton = (LinearLayout) findViewById(R.id.initiate_pay_button);
+        String customerId = ZoomKart.getCustomer().getId();
 
+        final Order order = Paper.book(customerId).read("CurrentOrder");
+        double subTotal, taxTotal, finalTotal;
 
-        Wallet.Payments.isReadyToPay(googleApiClient).setResultCallback(
-                new ResultCallback<BooleanResult>() {
-                    @Override
-                    public void onResult(@NonNull BooleanResult booleanResult) {
-                        if (booleanResult.getStatus().isSuccess()) {
-                            if (booleanResult.getValue()) {
-                                showAndroidPay();
-                            } else {
-                                // Hide Android Pay buttons, show a message that Android Pay
-                                // cannot be used yet, and display a traditional checkout button
-                                showAndroidPay();
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+
+        TextView subTotalView = (TextView) findViewById(R.id.subtotal_price);
+        TextView taxTotalView = (TextView) findViewById(R.id.tax_price);
+        TextView totalView = (TextView) findViewById(R.id.total_price);
+
+        subTotal = order.getmTotalAmount();
+        taxTotal = subTotal * 0.13;
+        finalTotal = subTotal + taxTotal;
+
+        subTotalView.setText(formatter.format(subTotal));
+        taxTotalView.setText(formatter.format(taxTotal));
+        totalView.setText(formatter.format(finalTotal));
+
+        initiatePayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Instantiate the RequestQueue.
+                RequestQueue queue = Volley.newRequestQueue(PaymentActivity.this);
+                String url ="http://ZoomKart.pythonanywhere.com/payments?user_id=1&order_id=" + order.getmId() + "&token=1";
+                final ProgressDialog progress = new ProgressDialog(PaymentActivity.this);
+                progress.setTitle("Loading");
+                progress.setMessage("Completing Payment ...");
+                progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+                progress.show();
+
+                // Request a string response from the provided URL.
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                // Display the first 500 characters of the response string.
+                                Log.d("Status", "Success!");
+                                progress.setTitle("Payment Complete!");
+                                progress.setMessage("Thanks for using ZoomKart!");
+                                Runnable progressRunnable = new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        progress.dismiss();
+                                        cleanUpActivity();
+                                    }
+                                };
+
+                                Handler pdCanceller = new Handler();
+                                pdCanceller.postDelayed(progressRunnable, 2000);
+
                             }
-                        } else {
-                            showAndroidPay();
-                            // Error making isReadyToPay call
-                            Log.e(TAG, "isReadyToPay:" + booleanResult.getStatus());
-                        }
-                    }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d("Status", "Failure!");
+                                progress.dismiss();
+                            }
                 });
-
-    }
-
-    public void showAndroidPay() {
-        setContentView(zoomkart.paykart.R.layout.activity_payment);
-
-        MaskedWalletRequest maskedWalletRequest = MaskedWalletRequest.newBuilder()
-
-                // Request credit card tokenization with Stripe by specifying tokenization parameters:
-                .setPaymentMethodTokenizationParameters(PaymentMethodTokenizationParameters.newBuilder()
-                        .setPaymentMethodTokenizationType(PaymentMethodTokenizationType.PAYMENT_GATEWAY)
-                        .addParameter("gateway", "stripe")
-                        .addParameter("stripe:publishableKey", PUBLISHABLE_KEY)
-                        .addParameter("stripe:version", StripeApiHandler.VERSION)
-                        .build())
-
-                // You want the shipping address:
-                .setShippingAddressRequired(true)
-
-                // Price set as a decimal:
-                .setEstimatedTotalPrice("0.00")
-                .setCurrencyCode("USD")
-                .build();
-
-        WalletFragmentStyle walletFragmentStyle = new WalletFragmentStyle()
-                .setBuyButtonText(WalletFragmentStyle.BuyButtonText.BUY_WITH)
-                .setBuyButtonAppearance(WalletFragmentStyle.BuyButtonAppearance.ANDROID_PAY_DARK)
-                .setBuyButtonWidth(WalletFragmentStyle.Dimension.MATCH_PARENT);
-
-        WalletFragmentOptions walletFragmentOptions = WalletFragmentOptions.newBuilder()
-                .setFragmentStyle(walletFragmentStyle)
-                .setTheme(WalletConstants.THEME_LIGHT)
-                .setMode(WalletFragmentMode.BUY_BUTTON)
-                .build();
-
-        mWalletFragment = SupportWalletFragment.newInstance(walletFragmentOptions);
-
-        WalletFragmentInitParams.Builder startParamsBuilder = WalletFragmentInitParams.newBuilder()
-                .setMaskedWalletRequest(maskedWalletRequest)
-                .setMaskedWalletRequestCode(LOAD_MASKED_WALLET_REQUEST_CODE);
-
-        mWalletFragment.initialize(startParamsBuilder.build());
-
-        // add Wallet fragment to the UI
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.wallet_fragment, mWalletFragment)
-                .commit();
-    }
-
-    public void onStart() {
-        super.onStart();
-        googleApiClient.connect();
-    }
-
-    public void onStop() {
-        super.onStop();
-        googleApiClient.disconnect();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == LOAD_MASKED_WALLET_REQUEST_CODE) { // Unique, identifying constant
-            if (resultCode == Activity.RESULT_OK) {
-                MaskedWallet maskedWallet = data.getParcelableExtra(WalletConstants.EXTRA_MASKED_WALLET);
-                FullWalletRequest fullWalletRequest = FullWalletRequest.newBuilder()
-                        .setCart(Cart.newBuilder()
-                                .setCurrencyCode("USD")
-                                .setTotalPrice("20.00")
-                                .addLineItem(LineItem.newBuilder() // Identify item being purchased
-                                        .setCurrencyCode("USD")
-                                        .setQuantity("1")
-                                        .setDescription("Premium Llama Food")
-                                        .setTotalPrice("20.00")
-                                        .setUnitPrice("20.00")
-                                        .build())
-                                .build())
-                        .setGoogleTransactionId(maskedWallet.getGoogleTransactionId())
-                        .build();
-                Wallet.Payments.loadFullWallet(googleApiClient, fullWalletRequest, LOAD_FULL_WALLET_REQUEST_CODE);
+// Add the request to the RequestQueue.
+                queue.add(stringRequest);
             }
-        } else if (requestCode == LOAD_FULL_WALLET_REQUEST_CODE) { // Unique, identifying constant
-            if (resultCode == Activity.RESULT_OK) {
-                FullWallet fullWallet = data.getParcelableExtra(WalletConstants.EXTRA_FULL_WALLET);
-                String tokenJSON = fullWallet.getPaymentMethodToken().getToken();
+        });
 
-                //A token will only be returned in production mode,
-                //i.e. WalletConstants.ENVIRONMENT_PRODUCTION
-                if (mEnvironment == WalletConstants.ENVIRONMENT_PRODUCTION)
-                {
-                    Gson gson = new Gson();
-                    Token token = gson.fromJson(tokenJSON, Token.class);
-                }
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
     }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {}
+    private void cleanUpActivity(){
+        Intent i = new Intent(this, HomepageActivity.class);
+        startActivity(i);
+        finish();
+    }
 
-    @Override
-    public void onConnected(Bundle bundle) {}
-
-    @Override
-    public void onConnectionSuspended(int i) {}
 }

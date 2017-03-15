@@ -17,7 +17,7 @@
     <ImageView
         android:adjustViewBounds="true"
         android:id="@+id/imageView2"
-        android:src="@drawable/sign_in"
+        android:src="@drawable/bill_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"/>

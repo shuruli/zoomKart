@@ -2,47 +2,45 @@ package zoomkart.paykart.models;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by sudhanvahuruli on 6/25/16.
  */
-public class Order {
+public class Order implements Serializable{
     private int mId;
-    private int mCustomerId;
-    private int mAisle;
+    private String mCustomerId;
+    private Date mDate;
     private double mTotalAmount = 0.0;
-    private List<Item> mItems;
+    private Item[] mItems;
 
-    public Order(int id, int customerId, int aisle, double totalAmount){
+    public Order(int id, String customerId, Date date, double totalAmount, Item[] items){
         this.mId = id;
         this.mCustomerId = customerId;
-        this.mAisle = aisle;
+        this.mDate = date;
         this.mTotalAmount = totalAmount;
+        this.mItems = items;
     }
 
-    public int getId() {
-        return this.mId;
+    public int getmId() {
+        return mId;
     }
 
-    public int getCustomerId() {
-        return this.mCustomerId;
+    public String getmCustomerId() {
+        return mCustomerId;
     }
 
-    public int getAisle(){
-        return this.mAisle;
+    public Date getmDate() {
+        return mDate;
     }
 
-    public double getTotalAmount() {
-        return this.mTotalAmount;
+    public double getmTotalAmount() {
+        return mTotalAmount;
     }
 
-    public List<Item> getItems(){
-        return this.mItems;
-    }
-
-    public void populateItemList(JSONObject jsonObject){
-    // Takes the list of Items that were sent from the server in the form of a JSON object and
-        // populates the item list. The item list is
+    public Item[] getmItems() {
+        return mItems;
     }
 }

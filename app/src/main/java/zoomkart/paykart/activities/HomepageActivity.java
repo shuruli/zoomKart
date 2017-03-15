@@ -1,13 +1,12 @@
 package zoomkart.paykart.activities;
 
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import zoomkart.paykart.R;
 
@@ -18,22 +17,36 @@ public class HomepageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_homepage);
-
         getSupportActionBar().hide();
 
-        LinearLayout mInitiateCheckoutButton = (LinearLayout) findViewById(R.id.initiate_checkout_button);
+        LinearLayout initiateCheckoutButton = (LinearLayout) findViewById(R.id.initiate_checkout_button);
+        FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.user_profile_button);
 
-        mInitiateCheckoutButton.setOnClickListener(new View.OnClickListener() {
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(HomepageActivity.this, CardInformationActivity.class);
+                HomepageActivity.this.startActivity(intent);
+            }
+        });
+
+        initiateCheckoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomepageActivity.this, NFCPairActivity.class);
                 HomepageActivity.this.startActivity(intent);
             }
         });
+
+        LinearLayout initiateHistoryButton = (LinearLayout) findViewById(R.id.initiate_history_button);
+
+        initiateHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomepageActivity.this, HistoryActivity.class);
+                HomepageActivity.this.startActivity(intent);
+            }
+        });
     }
 
-    private void initiateCheckout(){
-        Intent intent = new Intent(HomepageActivity.this, NFCPairActivity.class);
-        HomepageActivity.this.startActivity(intent);
-    }
 }

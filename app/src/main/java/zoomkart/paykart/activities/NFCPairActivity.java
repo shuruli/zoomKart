@@ -1,25 +1,12 @@
 package zoomkart.paykart.activities;
 
-import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
-import android.nfc.NfcEvent;
-import android.nfc.cardemulation.CardEmulation;
-import android.os.AsyncTask;
-import android.os.IBinder;
-import android.os.Messenger;
-import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -29,27 +16,29 @@ import com.pusher.client.channel.SubscriptionEventListener;
 
 import org.json.JSONObject;
 
-import java.nio.charset.Charset;
+import java.util.Date;
 
 import io.paperdb.Paper;
 import zoomkart.paykart.R;
 import zoomkart.paykart.models.Customer;
 import zoomkart.paykart.models.Item;
-import zoomkart.paykart.models.ListItems;
+import zoomkart.paykart.models.Order;
 import zoomkart.paykart.models.ZoomKart;
-import zoomkart.paykart.services.MyHostApduService;
 
-public class NFCPairActivity extends Activity {
+public class NFCPairActivity extends AppCompatActivity {
 
     NfcAdapter mNfcAdapter;
     SharedPreferences mSharedPreferences;
-    String mOrderString;
+    String orderId;
+    String customerId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nfcpair);
         Context context = getApplicationContext();
+        getSupportActionBar().setTitle("Tap + Checkout");
+
         Paper.init(this);
 
         mSharedPreferences= context.getSharedPreferences("NFC", Context.MODE_PRIVATE);
@@ -58,17 +47,20 @@ public class NFCPairActivity extends Activity {
         editor.commit();
 
         Pusher pusher = new Pusher("d6f65af47015b83ec19b");
+        Pusher pusher1 = new Pusher("d6f65af47015b83ec19b");
 
         final Channel channel = pusher.subscribe("channel");
+        final Channel items_channel = pusher1.subscribe("items-channel");
 
         channel.bind("my-event", new SubscriptionEventListener() {
             @Override
             public void onEvent(String channelName, String eventName, final String data) {
                 Log.d("[NFCPairActivity] Order", "Tap Complete");
                 Log.d("[NFCPairActivity] Order", "Initiate Order Channel and show user UI to place items.");
-                Customer customer = ZoomKart.getCustomer();
-                JSONObject json, obj;
+                final Customer customer = ZoomKart.getCustomer();
+                JSONObject json;
                 String str_value = "";
+
                 try {
 
                     json = new JSONObject(data);
@@ -79,27 +71,41 @@ public class NFCPairActivity extends Activity {
                     e.printStackTrace();
                 }
 
-                final String orderId = str_value;
-                final String bookName = customer.getId();
+                orderId = str_value;
+                customerId = customer.getId();
 
                 //Reset validRead
                 editor.putBoolean("validRead", false);
                 editor.commit();
 
-                channel.bind(orderId, new SubscriptionEventListener() {
-                    @Override
-                    public void onEvent(String s, String s1, String s2) {
-                        Item[] items = (new Gson()).fromJson(s2, Item[].class);
-                        Paper.book(bookName).write(data, items);
-                        for (int i = 0; i < items.length; i++){
-                            Log.d("[NFCPairActivity] Item:", items[i].name);
-                        }
-                    }
-                });
+            }
+        });
+
+        items_channel.bind("items-event", new SubscriptionEventListener() {
+            @Override
+            public void onEvent(String s, String s1, String s2) {
+                Item[] items = (new Gson()).fromJson(s2, Item[].class);
+                Date date = new Date();
+                float totalPrice = 0.0f;
+                for (int i = 0; i < items.length; i++){
+                    totalPrice += items[i].getPrice();
+                }
+                Order order = new Order(Integer.parseInt(orderId), customerId, date, totalPrice, items);
+
+                Paper.book(customerId).write("Order ID: " + orderId + "\nDate: " + date.toString(), order);
+                Paper.book(customerId).write("CurrentOrder", order);
+
+
+                for (int i = 0; i < items.length; i++){
+                    Log.d("[NFCPairActivity] Item", items[i].getName());
+                }
+
+                startBillActivity(order);
             }
         });
 
         pusher.connect();
+        pusher1.connect();
 
 
         // Check for available NFC Adapter
@@ -110,5 +116,12 @@ public class NFCPairActivity extends Activity {
             return;
         }
 
+    }
+
+    private void startBillActivity(Order order){
+        Intent i = new Intent(this, BillActivity.class);
+        i.putExtra("order", order);
+
+        startActivity(i);
     }
 }
