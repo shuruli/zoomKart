@@ -1,5 +1,6 @@
 package zoomkart.paykart.activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,6 +8,8 @@ import android.nfc.NfcAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -29,8 +32,10 @@ public class NFCPairActivity extends AppCompatActivity {
 
     NfcAdapter mNfcAdapter;
     SharedPreferences mSharedPreferences;
-    String orderId;
+    int orderId;
     String customerId;
+    Pusher pusher;
+    Channel channel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,42 +51,10 @@ public class NFCPairActivity extends AppCompatActivity {
         editor.putBoolean("isNFCOn", true);
         editor.commit();
 
-        Pusher pusher = new Pusher("d6f65af47015b83ec19b");
-        Pusher pusher1 = new Pusher("d6f65af47015b83ec19b");
+        pusher = new Pusher("d6f65af47015b83ec19b");
+        channel = pusher.subscribe("channel");
 
-        final Channel channel = pusher.subscribe("channel");
-        final Channel items_channel = pusher1.subscribe("items-channel");
-
-        channel.bind("my-event", new SubscriptionEventListener() {
-            @Override
-            public void onEvent(String channelName, String eventName, final String data) {
-                Log.d("[NFCPairActivity] Order", "Tap Complete");
-                Log.d("[NFCPairActivity] Order", "Initiate Order Channel and show user UI to place items.");
-                final Customer customer = ZoomKart.getCustomer();
-                JSONObject json;
-                String str_value = "";
-
-                try {
-
-                    json = new JSONObject(data);
-
-                    str_value = json.getString("data");
-
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-
-                orderId = str_value;
-                customerId = customer.getId();
-
-                //Reset validRead
-                editor.putBoolean("validRead", false);
-                editor.commit();
-
-            }
-        });
-
-        items_channel.bind("items-event", new SubscriptionEventListener() {
+        channel.bind("items-event", new SubscriptionEventListener() {
             @Override
             public void onEvent(String s, String s1, String s2) {
                 Item[] items = (new Gson()).fromJson(s2, Item[].class);
@@ -89,8 +62,11 @@ public class NFCPairActivity extends AppCompatActivity {
                 float totalPrice = 0.0f;
                 for (int i = 0; i < items.length; i++){
                     totalPrice += items[i].getPrice();
+                    orderId = items[i].getOrderId();
                 }
-                Order order = new Order(Integer.parseInt(orderId), customerId, date, totalPrice, items);
+                final Customer customer = ZoomKart.getCustomer();
+                customerId = customer.getId();
+                Order order = new Order(orderId, customerId, date, totalPrice, items);
 
                 Paper.book(customerId).write("Order ID: " + orderId + "\nDate: " + date.toString(), order);
                 Paper.book(customerId).write("CurrentOrder", order);
@@ -100,13 +76,15 @@ public class NFCPairActivity extends AppCompatActivity {
                     Log.d("[NFCPairActivity] Item", items[i].getName());
                 }
 
+                //Reset validRead
+                editor.putBoolean("validRead", false);
+                editor.commit();
+
                 startBillActivity(order);
             }
         });
 
         pusher.connect();
-        pusher1.connect();
-
 
         // Check for available NFC Adapter
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -116,12 +94,29 @@ public class NFCPairActivity extends AppCompatActivity {
             return;
         }
 
+        LinearLayout cancelNFCTapButton = (LinearLayout) findViewById(R.id.cancel_button);
+        cancelNFCTapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pusher.unsubscribe("channel");
+                pusher.disconnect();
+                Intent intent = new Intent(NFCPairActivity.this, HomepageActivity.class);
+                NFCPairActivity.this.startActivity(intent);
+                finish();
+            }
+        });
+
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 
     private void startBillActivity(Order order){
+        pusher.unsubscribe("channel");
+        pusher.disconnect();
         Intent i = new Intent(this, BillActivity.class);
-        i.putExtra("order", order);
-
         startActivity(i);
+        finish();
     }
 }

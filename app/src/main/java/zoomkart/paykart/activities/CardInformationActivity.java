@@ -1,5 +1,6 @@
 package zoomkart.paykart.activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import com.stripe.android.view.CardInputWidget;
 import io.paperdb.Paper;
 import zoomkart.paykart.R;
 import zoomkart.paykart.models.Customer;
+import zoomkart.paykart.models.Order;
 import zoomkart.paykart.models.ZoomKart;
 
 import static java.security.AccessController.getContext;
@@ -37,6 +39,7 @@ public class CardInformationActivity extends AppCompatActivity {
 
         final Customer customer = ZoomKart.getCustomer();
         Token token = Paper.book(customer.getId()).read("payment_token", null);
+        final Order order = Paper.book(customer.getId()).read("CurrentOrder", null);
 
         if (token != null){
             TextView textView = (TextView) findViewById(R.id.card_details_label);
@@ -64,6 +67,12 @@ public class CardInformationActivity extends AppCompatActivity {
                 Spinner provinceValue = (Spinner) findViewById(R.id.province_value);
                 final Context context = CardInformationActivity.this;
 
+                final ProgressDialog progress = new ProgressDialog(context);
+                progress.setTitle("Validating");
+                progress.setMessage("Saving Information...");
+                progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+                progress.show();
+
                 cardToSave.setName(nameValue.getText().toString());
                 cardToSave.setAddressLine1(addressValue.getText().toString());
                 cardToSave.setAddressZip(postalCodeValue.getText().toString());
@@ -83,12 +92,21 @@ public class CardInformationActivity extends AppCompatActivity {
                                 // Send token to your server
                                 Log.d("CardInformationActivity", "Stripe validation succeded");
                                 Paper.book(customer.getId()).write("payment_token", token);
-                                Intent intent = new Intent(CardInformationActivity.this, HomepageActivity.class);
-                                CardInformationActivity.this.startActivity(intent);
+
+                                if (order == null){
+                                    Intent intent = new Intent(CardInformationActivity.this, HomepageActivity.class);
+                                    CardInformationActivity.this.startActivity(intent);
+                                } else {
+                                    Intent intent = new Intent(CardInformationActivity.this, BillActivity.class);
+                                    CardInformationActivity.this.startActivity(intent);
+                                }
+                                finish();
+                                progress.dismiss();
                             }
                             public void onError(Exception error) {
                                 // Show localized error message
                                 Log.d("CardInformationActivity", "Stripe validation failed");
+                                progress.dismiss();
                             }
                         }
                 );

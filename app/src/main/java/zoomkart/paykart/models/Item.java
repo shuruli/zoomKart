@@ -9,6 +9,15 @@ import java.io.Serializable;
 public class Item implements Serializable{
     private String name;
     private float price;
+    private int order_id;
+
+    public int getOrderId() {
+        return order_id;
+    }
+
+    public void setOrderId(int orderId) {
+        this.order_id = orderId;
+    }
 
     public String getName() {
         return name;

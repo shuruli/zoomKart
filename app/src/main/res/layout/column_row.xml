@@ -8,9 +8,9 @@
         android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:layout_weight="3"
-        android:textSize="10pt"
+        android:textSize="8pt"
         android:ellipsize="none"
-        android:padding="20dp" />
+        android:padding="15dp" />
 
     <TextView
         android:id="@+id/price"
@@ -18,8 +18,8 @@
         android:gravity="right"
         android:layout_alignParentRight="true"
         android:layout_width="0dp"
-        android:textSize="8pt"
-        android:padding="20dp"
+        android:textSize="6pt"
+        android:padding="15dp"
         android:ellipsize="none"
         android:layout_weight="1" />
 

@@ -29,6 +29,7 @@ import java.util.Observer;
 import io.paperdb.Paper;
 import zoomkart.paykart.R;
 import zoomkart.paykart.models.Customer;
+import zoomkart.paykart.models.Order;
 import zoomkart.paykart.models.ZoomKart;
 import zoomkart.paykart.network.NetworkReceiver;
 
@@ -183,11 +184,16 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void proceedWithLogIn(){
         Token token = Paper.book(mCustomer.getId()).read("payment_token", null);
+        Order order = Paper.book(mCustomer.getId()).read("CurrentOrder", null);
 
         if (token == null){
             Intent mainIntent = new Intent(LoginActivity.this , CardInformationActivity.class);
             startActivity(mainIntent);
-        } else {
+        }
+        else if (order != null) {
+            Intent i = new Intent(this, BillActivity.class);
+            startActivity(i);
+        }else {
             Intent mainIntent = new Intent(LoginActivity.this , HomepageActivity.class);
             startActivity(mainIntent);
         }

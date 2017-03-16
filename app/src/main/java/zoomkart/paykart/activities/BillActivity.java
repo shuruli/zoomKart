@@ -16,6 +16,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import io.paperdb.Paper;
 import zoomkart.paykart.R;
 import zoomkart.paykart.models.Customer;
 import zoomkart.paykart.models.ListViewAdapter;
@@ -36,9 +37,11 @@ public class BillActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bill);
         getSupportActionBar().hide();
 
+        Paper.init(this);
+
         listView = (ListView) findViewById(R.id.items_list);
         Customer customer = ZoomKart.getCustomer();
-        Order order = (Order) getIntent().getSerializableExtra("order");
+        final Order order = Paper.book(customer.getId()).read("CurrentOrder");
 
 
         ListView listView=(ListView)findViewById(R.id.bills_items_list);

@@ -46,7 +46,7 @@ public class PaymentActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         LinearLayout initiatePayButton = (LinearLayout) findViewById(R.id.initiate_pay_button);
-        String customerId = ZoomKart.getCustomer().getId();
+        final String customerId = ZoomKart.getCustomer().getId();
 
         final Order order = Paper.book(customerId).read("CurrentOrder");
         double subTotal, taxTotal, finalTotal;
@@ -91,7 +91,7 @@ public class PaymentActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         progress.dismiss();
-                                        cleanUpActivity();
+                                        cleanUpActivity(customerId);
                                     }
                                 };
 
@@ -113,7 +113,8 @@ public class PaymentActivity extends AppCompatActivity {
 
     }
 
-    private void cleanUpActivity(){
+    private void cleanUpActivity(String customerId){
+        Paper.book(customerId).delete("CurrentOrder");
         Intent i = new Intent(this, HomepageActivity.class);
         startActivity(i);
         finish();
